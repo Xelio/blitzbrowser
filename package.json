@@ -1,12 +1,10 @@
 {
   "name": "browser-pool",
-  "version": "0.0.1",
-  "description": "",
-  "author": "",
-  "private": true,
-  "license": "UNLICENSED",
+  "version": "1.0.0",
+  "description": "Deploying, scaling and managing browsers at scale.",
+  "license": "Apache-2.0",
   "scripts": {
-    "build": "nest build",
+    "build": "rm -r ./dist && nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix"
   },
