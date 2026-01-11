@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { S3Client } from '@aws-sdk/client-s3';
 import { StatusController } from './controllers/status.controller';
-import { UserDataS3Service, UserDataService } from './services/user-data.service';
+import { UserDataService } from './services/user-data.service';
 import { BrowserPoolService } from './services/browser-pool.service';
 import { TimezoneService } from './services/timezone.service';
 import { CDPController } from './controllers/cdp.controller';
@@ -27,11 +27,8 @@ import { CDPController } from './controllers/cdp.controller';
         });
       }
     },
-    {
-      provide: UserDataService,
-      useClass: UserDataS3Service,
-    },
-
+    
+    UserDataService,
     BrowserPoolService,
     TimezoneService
   ],
