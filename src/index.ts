@@ -17,7 +17,6 @@ export {
     BrowserInstance,
     StatusController,
     UserDataService,
-    UserDataS3Service,
     BrowserPoolStatus,
     BrowserPoolService,
     TimezoneService,
