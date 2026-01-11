@@ -48,7 +48,7 @@ interface BrowserInstanceEvents {
   terminated: [];
 }
 
-interface ConnectionOptions {
+export interface ConnectionOptions {
   timezone?: string;
   proxy_url?: string;
   user_data_id?: string;
