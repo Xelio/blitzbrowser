@@ -401,7 +401,7 @@ export class BrowserInstance extends EventEmitter<BrowserInstanceEvents> {
 
     this.#browser_instance_process = spawn(
       `tini`,
-      ['-s', `--`, `node`, `./dist/components/browser-instance.process.js`],
+      ['-s', `--`, `node`, `${__dirname}/../../dist/components/browser-instance.process.js`],
       {
         stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
         env: {

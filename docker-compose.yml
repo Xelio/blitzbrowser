@@ -10,7 +10,9 @@ services:
     command: server --console-address ":9001" /data
     restart: always
   blitzbrowser:
-    image: sha256:75beb3e809758401bf3520576083f4a8d8094628cb0d61058be56de7cb1fbe32
+    build:
+      context: . 
+      dockerfile: Dockerfile
     command: node ./dist/main.js
     ports:
       - "9999:9999"
