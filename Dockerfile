@@ -24,3 +24,5 @@ COPY ./tsconfig.json ./tsconfig.json
 RUN npm run build
 
 ENTRYPOINT ["tini", "--"]
+
+CMD ["node", "./dist/main.js"]
