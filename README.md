@@ -21,8 +21,8 @@
 
 - [Features](#-features)
 - [Quick Start](#-quick-start)
-- [Cloud or self-hosted](#-cloud-or-self-hosted)
-- [Support](#-support)
+- [Cloud or self-hosted](#%EF%B8%8F-cloud-or--self-hosted)
+- [Support](#support)
 
 ## ✨ Features
 
