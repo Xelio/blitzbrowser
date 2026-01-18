@@ -4,7 +4,7 @@
       <picture>
         <source media="(prefers-color-scheme: dark)" srcset="./assets/logo-white.png" width="300">
         <source media="(prefers-color-scheme: light)" srcset="./assets/logo.png" width="300">
-        <img src="./assets/logo.svg" alt="Browserless logo" width="300">
+        <img src="./assets/logo.svg" alt="BlitzBrowser logo" width="300">
       </picture>
     </center>
   </a>
