@@ -4,6 +4,9 @@
   "description": "Deploying, scaling and managing headful browsers in docker.",
   "license": "Apache-2.0",
   "main": "./dist/index.js",
+  "repository": {
+    "url": "https://github.com/blitzbrowser/blitzbrowser"
+  },
   "scripts": {
     "build": "rm -rf ./dist && nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
