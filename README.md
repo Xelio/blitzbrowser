@@ -173,5 +173,3 @@ Our proxy is available as a standalone HTTP proxy. You don't need to use our clo
 ## ❔Support
 
 To get support, you can contact us on [Discord](https://discord.com/invite/qZ3tCZJ2Ze) or at [support@blitzbrowser.com](support@blitzbrowser.com).
-
-We will always prioritize cloud customers.
