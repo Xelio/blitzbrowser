@@ -9,13 +9,17 @@
     </center>
   </a>
   
-  <h3>Deploy and manage headful browsers in docker. Run your browsers with BlitzBrowser in the cloud or self hosted.</h3>
+  <h3>Deploy and manage headful browsers in docker. Run your browsers in the cloud or self hosted.</h3>
 
   <div>
     <img src="https://img.shields.io/github/actions/workflow/status/blitzbrowser/blitzbrowser/cicd.yml?style=flat-square" />
     <img src="https://img.shields.io/github/v/tag/blitzbrowser/blitzbrowser?style=flat-square" />
   </div>
 </div>
+
+---
+
+Connect to headful browsers from Puppeteer, Playwright and any CDP frameworks. Persist your user data with S3 and connect to HTTP proxies.
 
 ## 📋 Table of Contents
 
