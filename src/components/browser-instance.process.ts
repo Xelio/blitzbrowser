@@ -85,7 +85,7 @@ class BrowserInstanceProcess {
                 },
             });
 
-            this.#x11vnc_process = spawn('x11vnc', ['-display', display, '-nopw', '-listen', '0.0.0.0', '-forever', '-shared', '-noxdamage', '-ncache', '-verbose'], { stdio: 'inherit' });
+            this.#x11vnc_process = spawn('x11vnc', ['-display', display, '-nopw', '-listen', '0.0.0.0', '-forever', '-shared', '-noxdamage', '-ncache', '-nap', '-wait', '50', '-verbose'], { stdio: 'inherit' });
 
             console.log('Created puppeteer process.');
 
