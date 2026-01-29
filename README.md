@@ -9,7 +9,7 @@
     </center>
   </a>
   
-  <h3>Deploy and manage headful browsers in docker. Run your browsers in the cloud or self hosted.</h3>
+  <h3>Deploy and manage headful browsers in docker. Run your browsers self hosted or in the cloud.</h3>
 
   <div>
     <img src="https://img.shields.io/github/actions/workflow/status/blitzbrowser/blitzbrowser/cicd.yml?style=flat-square" />
@@ -19,26 +19,29 @@
 
 ---
 
+Managing browsers can be a recipe for memory leaks, zombie processes and devops issues. BlitzBrowser handles all the hard work of deploying and scaling the browsers, so you can focus on your code.
+
 Connect to headful browsers from Puppeteer, Playwright and any CDP frameworks. Persist your user data with S3 and connect to HTTP proxies.
 
-## 📋 Table of Contents
+## Table of Contents
 
-- [Features](#-features)
-- [Quick Start](#-quick-start)
-- [Configuration](#️-configuration)
-- [Cloud or self-hosted](#️-cloud-or--self-hosted)
+- [Features](#features)
+- [Quick Start](#quick-start)
+- [Configuration](#️configuration)
+- [Cloud or self-hosted](#️cloud-or-self-hosted)
 - [Support](#support)
 
-## ✨ Features
+## Features
 
-- **Parallelism** - Run multiple browsers concurrently.
-- **Chrome DevTools Protocol** - Connect directly from Puppeteer, Playwright and any CDP supported frameworks. No custom library needed.
-- **User Data Storage** - Save and reuse your browsing sessions easily with S3.
-- **Proxy** - Connect your browsers to any HTTP proxy.
-- **Queueing** - The CDP connections are queued while the browsers are starting.
-- **No DevOps** - Run your browsers without worrying about the infrastructure, zombie process or a script. The container manages everything for you.
+- **Parallelism** - Spin up and run multiple browsers concurrently.
+- **Chrome DevTools Protocol** - No proprietary SDK. Connect directly from Puppeteer, Playwright or any CDP supported framework.
+- **Headful** - Run the browsers with a GUI to bypass bot detection and to render exactly as a user would see.
+- **Persistent Sessions** - Persist your browser user data with S3.
+- **Proxy Support** - Connect your browsers to any HTTP proxies.
+- **Queueing** - CDP connections are automatically queued while the browser are starting.
+- **No DevOps** - Run your browsers without worrying about the infrastructure, zombie process or a custom script. The container manages everything for you.
 
-## 🚀 Quick Start
+## Quick Start
 
 Start in seconds with docker and then connect your code.
 
@@ -153,7 +156,7 @@ await browser.close();
 
 </details>
 
-## ⚙️ Configuration
+## Configuration
 
 The developer documentation is available at [https://docs.blitzbrowser.com/](https://docs.blitzbrowser.com/).
 
@@ -178,7 +181,7 @@ You use them like this: `ws://localhost:9999?proxyUrl=http://proxy.com&userDataI
 - `S3_USER_DATA_BUCKET`: The S3 bucket to store the user data.
 - `TAGS`: The tags used to identify the pool of browsers. No tags by default. The tags are in the following format `a=1,b=2,c=3`.
 
-## ☁️ Cloud or 💻 self-hosted
+## Cloud or self-hosted
 
 The cloud and self-hosted versions offer the same features.
 
@@ -188,6 +191,6 @@ The cloud version allows you to focus on scaling your features while we handle a
 
 Our proxy is available as a standalone HTTP proxy. You don't need to use our cloud version to get access to our proxies. It works with the self-hosted version and it is really cheap!
 
-## ❔Support
+## Support
 
 To get support, you can contact us on [Discord](https://discord.com/invite/qZ3tCZJ2Ze) or at [support@blitzbrowser.com](support@blitzbrowser.com).
