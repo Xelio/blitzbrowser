@@ -23,7 +23,7 @@
 
 <video src="https://github.com/user-attachments/assets/b4294d66-a202-4345-990c-58b3574f4f61"></video>
 
-Managing browsers can be a recipe for memory leaks, zombie processes and devops issues. BlitzBrowser handles all the hard work of deploying and scaling the browsers, so you can focus on your code.
+Managing browsers can become complicated with the memory leaks, zombie processes and devops issues. BlitzBrowser handles all the hard work of deploying and scaling the browsers, so you can focus on your code.
 
 Connect to headful browsers from Puppeteer, Playwright and any CDP frameworks. Persist your user data with S3 and connect to HTTP proxies.
 
