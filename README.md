@@ -9,7 +9,7 @@
     </center>
   </a>
   
-  <h3>Deploy and manage headful browsers in docker. Run your browsers self hosted or in the cloud.</h3>
+  <h3>Deploy and manage headful browsers in docker.</h3>
 
   <div>
     <img src="https://img.shields.io/github/actions/workflow/status/blitzbrowser/blitzbrowser/cicd.yml?style=flat-square" />
