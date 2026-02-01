@@ -21,9 +21,7 @@
 
 ---
 
-<div align="center">
-  <video height="300px" src="./assets/live-view.mp4"></video>
-</div>
+<video src="https://github.com/user-attachments/assets/b4294d66-a202-4345-990c-58b3574f4f61"></video>
 
 <br />
 
