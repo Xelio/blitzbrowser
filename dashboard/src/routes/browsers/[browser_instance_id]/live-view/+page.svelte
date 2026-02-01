@@ -2,14 +2,15 @@
   import { page } from '$app/state';
   import { browser_store } from '$lib/browsers.svelte';
   import * as Card from '$lib/components/ui/card';
-  import { onDestroy } from 'svelte';
+  import { websocket_url } from '$lib/urls';
+  import { onDestroy, onMount } from 'svelte';
 
   let browser = $derived(
     browser_store.browsers.get(page.params.browser_instance_id || ''),
   );
 
   let vnc_url = $derived(
-    `ws://localhost:9999/browser-instances/${page.params.browser_instance_id}/vnc`,
+    `${websocket_url}browser-instances/${page.params.browser_instance_id}/vnc`,
   );
   let vnc_connection_status: 'CONNECTED' | 'CONNECTING' | 'DISCONNECTED' =
     $state('DISCONNECTED');
@@ -17,37 +18,38 @@
   let rfb: any;
   let rfb_container: HTMLElement;
 
-  $effect(() => {
+  onMount(connectVNC);
+
+  async function connectVNC() {
     if (rfb) {
       rfb.disconnect();
-      rfb = undefined;
     }
 
-    if (browser) {
-      (async () => {
-        // @ts-ignore
-        const { default: RFB } = await import('@novnc/novnc');
+    // @ts-ignore
+    const { default: RFB } = await import('@novnc/novnc');
 
-        try {
-          rfb = new RFB(rfb_container, vnc_url);
+    try {
+      rfb = new RFB(rfb_container, vnc_url);
 
-          rfb.addEventListener('connect', () => {
-            vnc_connection_status = 'CONNECTED';
-            rfb.viewOnly = false;
-            rfb.scaleViewport = true;
-          });
+      rfb.addEventListener('connect', () => {
+        vnc_connection_status = 'CONNECTED';
+        rfb.viewOnly = false;
+        rfb.scaleViewport = true;
+      });
 
-          rfb.addEventListener('disconnect', (e: any) => {
-            vnc_connection_status = 'DISCONNECTED';
-          });
+      rfb.addEventListener('disconnect', (e: any) => {
+        vnc_connection_status = 'DISCONNECTED';
 
-          vnc_connection_status = 'CONNECTING';
-        } catch (err) {
-          console.error('noVNC initialization failed:', err);
+        if (browser) {
+          setTimeout(connectVNC, 250);
         }
-      })();
+      });
+
+      vnc_connection_status = 'CONNECTING';
+    } catch (err) {
+      console.error('noVNC initialization failed:', err);
     }
-  });
+  }
 
   onDestroy(() => {
     if (rfb) {
@@ -55,6 +57,10 @@
     }
   });
 </script>
+
+<svelte:head>
+  <title>Live View | BlitzBrowser</title>
+</svelte:head>
 
 <Card.Root>
   <Card.Header>

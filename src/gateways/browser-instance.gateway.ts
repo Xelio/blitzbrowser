@@ -26,7 +26,7 @@ export class BrowserInstanceWebSocketGateway implements OnModuleInit {
         });
     }
 
-    @Interval(3000)
+    @Interval(1000)
     updateBrowserInstancesStatus() {
         this.#sendBrowserInstancesStatus();
     }

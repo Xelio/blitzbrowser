@@ -1,5 +1,5 @@
 import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
-import { BrowserInstance, ConnectionOptionsEvent } from 'src/components/browser-instance.component';
+import { BrowserInstance, ConnectionOptions, ConnectionOptionsEvent } from 'src/components/browser-instance.component';
 import { BrowserPoolService } from 'src/services/browser-pool.service';
 import { WebSocket } from 'ws';
 import z from 'zod';
@@ -10,12 +10,14 @@ export const PROXY_URL_QUERY_PARAM = 'proxyUrl';
 export const TIMEZONE_QUERY_PARAM = 'timezone';
 export const USER_DATA_ID_QUERY_PARAM = 'userDataId';
 export const USER_DATA_READ_ONLY_QUERY_PARAM = 'userDataReadOnly';
+export const LIVE_VIEW_QUERY_PARAM = 'liveView';
 
 const ConnectionOptionQueryParams = z.object({
   proxy_url: z.url().optional(),
   timezone: z.string().optional(),
   user_data_id: z.string().optional(),
   user_data_read_only: z.boolean().optional().default(false),
+  live_view: z.boolean().optional().default(false),
 });
 
 type ConnectionOptionQueryParams = z.infer<typeof ConnectionOptionQueryParams>;
@@ -86,8 +88,12 @@ export class CDPWebSocketGateway implements OnModuleDestroy {
       tunnel.receiveMessage(Message.of(BrowserInstance.EVENT_CHANNEL_ID, JSON.stringify({
         type: 'CONNECTION_OPTIONS',
         options: {
-          ...parsed_connection_options.data
-        }
+          proxy_url: parsed_connection_options.data.proxy_url,
+          timezone: parsed_connection_options.data.timezone,
+          user_data_id: parsed_connection_options.data.user_data_id,
+          user_data_read_only: parsed_connection_options.data.user_data_read_only,
+          vnc_enabled: parsed_connection_options.data.live_view === true,
+        } satisfies ConnectionOptions
       } satisfies ConnectionOptionsEvent)));
 
       this.#logger.log('Sent connection options');
@@ -136,6 +142,7 @@ export class CDPWebSocketGateway implements OnModuleDestroy {
       proxy_url: this.getQueryParamValue(PROXY_URL_QUERY_PARAM, url),
       user_data_id: this.getQueryParamValue(USER_DATA_ID_QUERY_PARAM, url),
       user_data_read_only: this.getQueryParamValue(USER_DATA_READ_ONLY_QUERY_PARAM, url)?.toLowerCase() === 'true',
+      live_view: this.getQueryParamValue(LIVE_VIEW_QUERY_PARAM, url)?.toLowerCase() === 'true',
     });
   }
 

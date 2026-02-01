@@ -4,8 +4,13 @@
   import Video from '@lucide/svelte/icons/video';
   import * as Card from '$lib/components/ui/card';
   import * as Table from '$lib/components/ui/table';
+  import * as Tooltip from '$lib/components/ui/tooltip';
   import { DateTime } from 'luxon';
 </script>
+
+<svelte:head>
+  <title>Headful Browsers | BlitzBrowser</title>
+</svelte:head>
 
 <Card.Root>
   <Card.Header>
@@ -18,7 +23,7 @@
         <Table.Row>
           <Table.Head class="w-36">Status</Table.Head>
           <Table.Head>Id</Table.Head>
-          <Table.Head>Duration</Table.Head>
+          <Table.Head class="w-36">Duration</Table.Head>
           <Table.Head class="text-end">Actions</Table.Head>
         </Table.Row>
       </Table.Header>
@@ -41,14 +46,36 @@
               </div>
             </Table.Cell>
             <Table.Cell>{browser.id}</Table.Cell>
-            <Table.Cell>{browser.connected_at ? DateTime.fromISO(browser.connected_at).diffNow() : '-'}</Table.Cell>
+            <Table.Cell>
+              {browser.connected_at
+                ? DateTime.now()
+                    .diff(DateTime.fromISO(browser.connected_at))
+                    .toFormat('hh:mm:ss')
+                : '-'}
+            </Table.Cell>
             <Table.Cell class="text-end">
-              <a href={`/browsers/${browser.id}/live-view`}>
-                <Button variant="outline" class="cursor-pointer" size="sm">
-                  <Video />
-                  Live View
-                </Button>
-              </a>
+              {#if browser.vnc_enabled}
+                <a href={`/browsers/${browser.id}/live-view`}>
+                  <Button variant="outline" class="cursor-pointer" size="sm">
+                    <Video />
+                    Live View
+                  </Button>
+                </a>
+              {:else}
+                <Tooltip.Provider>
+                  <Tooltip.Root>
+                    <Tooltip.Trigger>
+                      <Button disabled variant="outline" size="sm">
+                        <Video />
+                        Live View
+                      </Button>
+                    </Tooltip.Trigger>
+                    <Tooltip.Content>
+                      <p>Live view not enabled.</p>
+                    </Tooltip.Content>
+                  </Tooltip.Root>
+                </Tooltip.Provider>
+              {/if}
             </Table.Cell>
           </Table.Row>
         {/each}

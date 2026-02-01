@@ -53,6 +53,7 @@ export interface ConnectionOptions {
   proxy_url?: string;
   user_data_id?: string;
   user_data_read_only?: boolean;
+  vnc_enabled: boolean;
 }
 
 /**
@@ -98,6 +99,8 @@ export type BrowserInstanceEvent = ConnectionOptionsEvent | CDPCloseEvent | CDPT
 
 export interface BrowserInstanceStatus {
   id: string;
+
+  vnc_enabled: boolean;
 
   browser_pool: BrowserPoolStatus;
 
@@ -161,6 +164,10 @@ export class BrowserInstance extends EventEmitter<BrowserInstanceEvents> {
     this.#browser_pool_service = this.module_ref.get(BrowserPoolService);
     this.#logger = new Logger(`${BrowserInstance.name}|${id}`);
     this.#user_data_folder = `/home/pptruser/user-data/${id}`;
+  }
+
+  get vnc_enabled() {
+    return this.#connection_options?.vnc_enabled === true;
   }
 
   get vnc_port() {
@@ -420,6 +427,7 @@ export class BrowserInstance extends EventEmitter<BrowserInstanceEvents> {
           DISPLAY_ID: `${this.#cdp_port}`,
           CDP_PORT: `${this.#cdp_port}`,
           VNC_PORT: `${this.#vnc_port}`,
+          VNC_ENABLED: `${this.vnc_enabled}`,
           PROXY_SERVER_PORT: `${this.#proxy_server.port}`,
           USER_DATA_FOLDER: this.#user_data_folder,
           TZ: this.#timezone
@@ -514,6 +522,7 @@ export class BrowserInstance extends EventEmitter<BrowserInstanceEvents> {
   get status() {
     return {
       id: this.id,
+      vnc_enabled: this.vnc_enabled,
       browser_pool: this.#browser_pool_service.status,
       connected_at: this.#connected_at,
       preparation_tasks_started_at: this.#preparation_tasks_started_at,

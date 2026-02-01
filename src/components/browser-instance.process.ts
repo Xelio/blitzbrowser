@@ -8,8 +8,10 @@ let SIGTERM_RECEIVED = false;
 class BrowserInstanceProcess {
 
     readonly #display_id = parseInt(process.env.DISPLAY_ID);
+    readonly #display = `:${this.#display_id}`;
     readonly #cdp_port = parseInt(process.env.CDP_PORT);
     readonly #vnc_port = parseInt(process.env.VNC_PORT);
+    readonly #vnc_enabled = process.env.VNC_ENABLED === 'true';
     readonly #proxy_server_port = parseInt(process.env.PROXY_SERVER_PORT);
     readonly #timezone = process.env.TZ;
     readonly #user_data_folder = process.env.USER_DATA_FOLDER;
@@ -33,85 +35,14 @@ class BrowserInstanceProcess {
             return;
         }
 
-        console.log('Launching');
+        console.log('Creating processes');
 
         try {
-            const display_id = this.#display_id;
-            const display = `:${display_id}`;
-
-            // When container is restarting, xvfb locks are not always released on file system.
-            await fsPromise.rm(`/tmp/.X${display_id}-lock`, { force: true });
-
-            console.log('Creating xvfb process');
-            this.#xvfb_process = spawn('Xvfb', [display, '-screen', '0', '1920x1080x16']);
-
-            await new Promise((resolve) => { setTimeout(resolve, 100); });
-
-            this.#fluxbox_process = spawn('fluxbox', ['-display', display], { stdio: 'inherit' });;
-
-            console.log('Creating puppeteer process');
-            this.#puppeteer_process = await puppeteer.launch({
-                headless: false,
-                executablePath: puppeteer.executablePath(),
-                userDataDir: this.#user_data_folder,
-                dumpio: true,
-                handleSIGTERM: false,
-                args: [
-                    `--remote-debugging-port=${this.#cdp_port}`,
-                    '--remote-debugging-address=0.0.0.0',
-                    '--no-first-run',
-                    '--no-default-browser-check',
-                    `--display=${display}`,
-                    '--disable-breakpad', // Disables crash reporting
-                    '--disable-component-update', // Disables updates to internal components
-                    '--disable-print-preview', // Disables print preview
-                    '--disable-domain-reliability', // Disables domain reliability service(client-side reliability monitoring system for Google sites)
-                    '--disk-cache-dir=/dev/null', // Prevents disk caching
-                    '--no-pings', // Disables hyperlink auditing pings
-                    '--disable-notifications', // Prevents web push notifications
-                    '--disable-features=TranslateUI', // Disables the translate UI
-                    '--disable-background-networking',
-                    '--disable-sync',
-                    '--disable-extensions',
-                    '--disable-signin-promo',
-                    '--disable-gpu',
-                    '--metrics-recording-only', // Record metrics, but doesn't report them
-                    '--disable-features=PersistentHistograms', // Prevents generation of BrowserMetrics files on disk
-                    `--start-maximized`,
-                    `--proxy-server=http://127.0.0.1:${this.#proxy_server_port}`,
-                    process.env.DISABLE_SHM === 'true' ? '--disable-dev-shm-usage' : undefined
-                ].filter(s => typeof s === 'string'),
-                env: {
-                    TZ: this.#timezone
-                },
-            });
-
-            this.#x11vnc_process = spawn('x11vnc', ['-display', display, '-nopw', '-listen', '0.0.0.0', '-rfbport', `${this.#vnc_port}`, '-forever', '-shared', '-noxdamage', '-ncache', '0', '-nap', '-wait', '42', '-verbose'], { stdio: 'inherit' });
-
-            console.log('Created puppeteer process.');
-
-            this.#puppeteer_process.on('disconnected', () => {
-                this.#client_disconnected = true;
-                console.log('Client disconnected');
-            });
-
-            const interval_id = setInterval(() => {
-                if (this.#puppeteer_process.connected) {
-                    return;
-                }
-
-                clearInterval(interval_id);
-
-                if (this.#is_closing) {
-                    return;
-                }
-
-                console.log(`Puppeteer not connected.`);
-
-                this.close();
-            }, 200);
+            await this.#createVirtualDisplay();
+            await this.#createPuppeteerProcess();
+            await this.#createVNCProcess();
         } catch (e) {
-            console.log('Error while launching processes', e);
+            console.log('Error while creating processes', e);
             this.close();
         } finally {
             if (SIGTERM_RECEIVED) {
@@ -199,6 +130,103 @@ class BrowserInstanceProcess {
             }, 50);
         });
     }
+
+
+    async #createVirtualDisplay() {
+        // When container is restarting, xvfb locks are not always released on file system.
+        await fsPromise.rm(`/tmp/.X${this.#display_id}-lock`, { force: true });
+
+        console.log('Creating xvfb process');
+        this.#xvfb_process = spawn('Xvfb', [this.#display, '-screen', '0', '1920x1080x16']);
+
+        await new Promise((resolve) => { setTimeout(resolve, 100); });
+
+        this.#fluxbox_process = spawn('fluxbox', ['-display', this.#display], { stdio: 'inherit' });;
+    }
+
+    #createVNCProcess() {
+        if (!this.#vnc_enabled) {
+            return;
+        }
+
+        this.#x11vnc_process = spawn('x11vnc', [
+            '-display', this.#display,
+            '-nopw',        // No Password
+            '-listen', '0.0.0.0',
+            '-rfbport', `${this.#vnc_port}`,
+            '-forever',     // Doesn't close vnc server when client disconnect
+            '-shared',      // Allow multiple clients to connect
+            '-noxdamage',   // Doesn't wait for xdamage notification
+            '-ncache', '0', // No caching
+            '-nap',         // Reduce resource usage when no client connected
+            '-wait', '42',  // 24 fps. Wait 42 ms between frames
+            '-verbose'
+        ], { stdio: 'inherit' });
+    }
+
+    async #createPuppeteerProcess() {
+        console.log('Creating puppeteer process');
+
+        this.#puppeteer_process = await puppeteer.launch({
+            headless: false,
+            executablePath: puppeteer.executablePath(),
+            userDataDir: this.#user_data_folder,
+            dumpio: true,
+            handleSIGTERM: false,
+            args: [
+                `--remote-debugging-port=${this.#cdp_port}`,
+                '--remote-debugging-address=0.0.0.0',
+                '--no-first-run',
+                '--no-default-browser-check',
+                `--display=${this.#display}`,
+                '--disable-breakpad', // Disables crash reporting
+                '--disable-component-update', // Disables updates to internal components
+                '--disable-print-preview', // Disables print preview
+                '--disable-domain-reliability', // Disables domain reliability service(client-side reliability monitoring system for Google sites)
+                '--disk-cache-dir=/dev/null', // Prevents disk caching
+                '--no-pings', // Disables hyperlink auditing pings
+                '--disable-notifications', // Prevents web push notifications
+                '--disable-features=TranslateUI', // Disables the translate UI
+                '--disable-background-networking',
+                '--disable-sync',
+                '--disable-extensions',
+                '--disable-signin-promo',
+                '--disable-gpu',
+                '--metrics-recording-only', // Record metrics, but doesn't report them
+                '--disable-features=PersistentHistograms', // Prevents generation of BrowserMetrics files on disk
+                `--start-maximized`,
+                `--proxy-server=http://127.0.0.1:${this.#proxy_server_port}`,
+                process.env.DISABLE_SHM === 'true' ? '--disable-dev-shm-usage' : undefined
+            ].filter(s => typeof s === 'string'),
+            env: {
+                TZ: this.#timezone
+            },
+        });
+
+        console.log('Created puppeteer process.');
+
+        this.#puppeteer_process.on('disconnected', () => {
+            this.#client_disconnected = true;
+            console.log('Client disconnected');
+        });
+
+        const interval_id = setInterval(() => {
+            if (this.#puppeteer_process.connected) {
+                return;
+            }
+
+            clearInterval(interval_id);
+
+            if (this.#is_closing) {
+                return;
+            }
+
+            console.log(`Puppeteer not connected.`);
+
+            this.close();
+        }, 200);
+    }
+
 }
 
 let browser_instance_process: BrowserInstanceProcess;

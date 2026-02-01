@@ -1,3 +1,5 @@
+import { api_url, websocket_url } from "./urls";
+
 export interface BrowserPool {
     id: string;
     started_at: string;
@@ -5,8 +7,10 @@ export interface BrowserPool {
     tags: { [key: string]: string; };
 };
 
-export interface Browser {
+export interface BrowserInstances {
     id: string;
+
+    vnc_enabled: boolean;
 
     browser_pool: BrowserPool;
 
@@ -25,13 +29,51 @@ export class BrowserStore {
 
     browser_pool: BrowserPool | undefined = $state(undefined);
 
-    browsers: Map<string, Browser> = $state(new Map());
+    browsers: Map<string, BrowserInstances> = $state(new Map());
 
-    update(browsers: Browser[]) {
-        this.browsers = browsers.reduce((map, browser) => {
-            map.set(browser.id, browser);
-            return map;
-        }, new Map());
+    #websocket: WebSocket | undefined;
+
+    /**
+     * Connect the client to the backend. Update the browser pool status and connect to the browser instances status feed.
+     */
+    async connect() {
+        await this.#updateBrowserPool();
+        this.#connectBrowserInstances();
+    }
+
+    #connectBrowserInstances() {
+        this.#websocket = new WebSocket(`${websocket_url}browser-instances`);
+
+        this.#websocket.onmessage = (event) => {
+            const browser_instances = JSON.parse(event.data) as BrowserInstances[];
+
+            this.browsers = browser_instances.reduce((map, browser) => {
+                map.set(browser.id, browser);
+                return map;
+            }, new Map());
+        };
+
+        this.#websocket.onclose = () => {
+            setTimeout(() => {
+                this.#connectBrowserInstances();
+            }, 250);
+        };
+    }
+
+    async #updateBrowserPool() {
+        while (true) {
+            try {
+                const response = await fetch(`${api_url}browser-pool`);
+
+                browser_store.browser_pool = await response.json();
+
+                return;
+            } catch (e) {
+                await new Promise((resolve) => {
+                    setTimeout(resolve, 100);
+                })
+            }
+        }
     }
 
 }
