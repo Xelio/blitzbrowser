@@ -1,5 +1,5 @@
 <script lang="ts">
-  import './layout.css';
+  import '../layout.css';
   import { ModeWatcher } from 'mode-watcher';
   import AppSidebar from '$lib/components/app-sidebar.svelte';
   import { Separator } from '$lib/components/ui/separator/index.js';
