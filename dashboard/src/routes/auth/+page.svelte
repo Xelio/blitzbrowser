@@ -8,7 +8,6 @@
     import "../layout.css";
     import Button from "$lib/components/ui/button/button.svelte";
     import Input from "$lib/components/ui/input/input.svelte";
-    import { goto } from "$app/navigation";
     import { ModeWatcher } from "mode-watcher";
 
     let error_message: string = $state("");
@@ -37,7 +36,7 @@
                 await response.json();
 
             if (authenticated) {
-                goto("/");
+                window.location.href = '/';
             } else {
                 error_message = "Wrong Auth Key Provided.";
             }

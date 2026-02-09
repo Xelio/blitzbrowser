@@ -7,5 +7,8 @@ export function GET({ cookies }) {
         error(403, 'You are not authenticated');
     }
 
-    return json({ api_key: env.BLITZBROWSER_API_KEY });
+    return json({
+        url: env.BLITZBROWSER_API_URL || 'http://localhost:9999',
+        api_key: env.BLITZBROWSER_API_KEY
+    });
 }

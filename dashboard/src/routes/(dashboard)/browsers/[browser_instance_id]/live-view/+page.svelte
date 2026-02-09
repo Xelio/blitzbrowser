@@ -1,19 +1,17 @@
 <script lang="ts">
-  import { page } from '$app/state';
-  import { browser_store } from '$lib/browsers.svelte';
-  import * as Card from '$lib/components/ui/card';
-  import { blitzbrowser_api_key, websocket_url } from '$lib/api';
-  import { onDestroy, onMount } from 'svelte';
+  import { page } from "$app/state";
+  import { browser_store } from "$lib/browsers.svelte";
+  import * as Card from "$lib/components/ui/card";
+  import { getLiveViewWebsocketUrl } from "$lib/api";
+  import { onDestroy, onMount } from "svelte";
 
   let browser = $derived(
-    browser_store.browsers.get(page.params.browser_instance_id || ''),
+    browser_store.browsers.get(page.params.browser_instance_id || ""),
   );
 
-  let vnc_url = $derived(
-    `${websocket_url}browser-instances/${page.params.browser_instance_id}/vnc?apiKey=${blitzbrowser_api_key}`,
-  );
-  let vnc_connection_status: 'CONNECTED' | 'CONNECTING' | 'DISCONNECTED' =
-    $state('DISCONNECTED');
+  let vnc_url = $derived(getLiveViewWebsocketUrl(page.params.browser_instance_id || ""));
+  let vnc_connection_status: "CONNECTED" | "CONNECTING" | "DISCONNECTED" =
+    $state("DISCONNECTED");
 
   let rfb: any;
   let rfb_container: HTMLElement;
@@ -26,28 +24,28 @@
     }
 
     // @ts-ignore
-    const { default: RFB } = await import('@novnc/novnc');
+    const { default: RFB } = await import("@novnc/novnc");
 
     try {
       rfb = new RFB(rfb_container, vnc_url);
 
-      rfb.addEventListener('connect', () => {
-        vnc_connection_status = 'CONNECTED';
+      rfb.addEventListener("connect", () => {
+        vnc_connection_status = "CONNECTED";
         rfb.viewOnly = false;
         rfb.scaleViewport = true;
       });
 
-      rfb.addEventListener('disconnect', (e: any) => {
-        vnc_connection_status = 'DISCONNECTED';
+      rfb.addEventListener("disconnect", (e: any) => {
+        vnc_connection_status = "DISCONNECTED";
 
         if (browser) {
           setTimeout(connectVNC, 250);
         }
       });
 
-      vnc_connection_status = 'CONNECTING';
+      vnc_connection_status = "CONNECTING";
     } catch (err) {
-      console.error('noVNC initialization failed:', err);
+      console.error("noVNC initialization failed:", err);
     }
   }
 
@@ -67,14 +65,14 @@
     <Card.Title>
       <div class="flex flex-row items-center gap-3">
         <span class="relative flex size-3">
-          {#if vnc_connection_status === 'CONNECTED'}
+          {#if vnc_connection_status === "CONNECTED"}
             <span
               class="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"
             >
             </span>
             <span class="relative inline-flex size-3 rounded-full bg-green-500">
             </span>
-          {:else if vnc_connection_status === 'CONNECTING'}
+          {:else if vnc_connection_status === "CONNECTING"}
             <span
               class="absolute inline-flex h-full w-full animate-ping rounded-full bg-yellow-400 opacity-75"
             >

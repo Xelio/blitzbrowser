@@ -1,11 +1,4 @@
-import { api_url, blitzbrowser_api_key, websocket_url } from "./api";
-
-export interface BrowserPool {
-    id: string;
-    started_at: string;
-    max_browser_instances: number;
-    tags: { [key: string]: string; };
-};
+import { getBrowserInstancesEventsWebsocketURL, getBrowserPool, type BrowserPool } from "./api";
 
 export interface BrowserInstances {
     id: string;
@@ -42,7 +35,7 @@ export class BrowserStore {
     }
 
     #connectBrowserInstances() {
-        this.#websocket = new WebSocket(`${websocket_url}browser-instances?apiKey=${blitzbrowser_api_key}`);
+        this.#websocket = new WebSocket(getBrowserInstancesEventsWebsocketURL());
 
         this.#websocket.onmessage = (event) => {
             const browser_instances = JSON.parse(event.data) as BrowserInstances[];
@@ -63,13 +56,7 @@ export class BrowserStore {
     async #updateBrowserPool() {
         while (true) {
             try {
-                const response = await fetch(`${api_url}browser-pool`, {
-                    headers: {
-                        'x-api-key': blitzbrowser_api_key
-                    }
-                });
-
-                browser_store.browser_pool = await response.json();
+                browser_store.browser_pool = await getBrowserPool();
 
                 return;
             } catch (e) {
