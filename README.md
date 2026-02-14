@@ -23,7 +23,7 @@
 
 <video src="https://github.com/user-attachments/assets/b4294d66-a202-4345-990c-58b3574f4f61"></video>
 
-Managing browsers can become complicated with the memory leaks, zombie processes and devops issues. BlitzBrowser handles all the hard work of deploying and scaling the browsers, so you can focus on your code.
+Managing browsers can be a recipe for memory leaks, zombie processes and devops issues. BlitzBrowser handles all the hard work of deploying and scaling the browsers, so you can focus on your code.
 
 Connect to headful browsers from Puppeteer, Playwright and any CDP frameworks. Persist your user data with S3 and connect to HTTP proxies.
 
@@ -36,14 +36,15 @@ Connect to headful browsers from Puppeteer, Playwright and any CDP frameworks. P
 
 ## Features
 
+- [**Live View**](https://docs.blitzbrowser.com/self-hosted/features/live-view) - Watch and interact directly with any browser currently running.
+- [**Persistent Sessions**](https://docs.blitzbrowser.com/self-hosted/features/user-data-storage) - Persist your browser user data with S3.
+- [**Proxy Support**](https://docs.blitzbrowser.com/self-hosted/features/http-proxy) - Connect your browsers to any HTTP proxies.
+- [**Security**](https://docs.blitzbrowser.com/self-hosted/features/security) - Control who can access the browsers.
+- [**Chrome DevTools Protocol**](https://docs.blitzbrowser.com/self-hosted/configurations/chrome-devtools-protocol) - No proprietary SDK. Connect directly from Puppeteer, Playwright or any CDP supported framework.
 - **Parallelism** - Spin up and run multiple browsers concurrently.
-- **Chrome DevTools Protocol** - No proprietary SDK. Connect directly from Puppeteer, Playwright or any CDP supported framework.
 - **Headful** - Run the browsers with a GUI to bypass bot detection and to render exactly as a user would see.
-- **Live View** - Watch and interact directly with any browsers currently running.
-- **Persistent Sessions** - Persist your browser user data with S3.
-- **Proxy Support** - Connect your browsers to any HTTP proxies.
-- **Queueing** - CDP connections are automatically queued while the browser are starting.
-- **No DevOps** - Run your browsers without worrying about the infrastructure, zombie process or a custom script. The container manages everything for you.
+- **Queueing** - CDP connections are automatically queued while the browsers are starting.
+- **No DevOps** - Run your browsers without worrying about the infrastructure, zombie processes or a custom script. The container manages everything for you.
 
 ## Quick Start
 
