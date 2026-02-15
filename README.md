@@ -37,7 +37,7 @@ Connect to headful browsers from Puppeteer, Playwright and any CDP frameworks. P
 ## Features
 
 - [**Live View**](https://docs.blitzbrowser.com/self-hosted/features/live-view) - Watch and interact directly with any browser currently running.
-- [**Persistent Sessions**](https://docs.blitzbrowser.com/self-hosted/features/user-data-storage) - Persist your browser user data with S3.
+- [**Persistent Sessions**](https://docs.blitzbrowser.com/self-hosted/features/user-data-storage) - Persist your browser user data.
 - [**Proxy Support**](https://docs.blitzbrowser.com/self-hosted/features/http-proxy) - Connect your browsers to any HTTP proxies.
 - [**Security**](https://docs.blitzbrowser.com/self-hosted/features/security) - Control who can access the browsers.
 - [**Chrome DevTools Protocol**](https://docs.blitzbrowser.com/self-hosted/configurations/chrome-devtools-protocol) - No proprietary SDK. Connect directly from Puppeteer, Playwright or any CDP supported framework.
