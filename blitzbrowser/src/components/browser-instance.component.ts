@@ -271,7 +271,7 @@ export class BrowserInstance extends EventEmitter<BrowserInstanceEvents> {
       return;
     }
 
-    await this.module_ref.get(UserDataService).downloadUserData(
+    await this.module_ref.get(UserDataService).load(
       this.#connection_options.user_data_id,
       this.#user_data_folder
     );
@@ -408,7 +408,7 @@ export class BrowserInstance extends EventEmitter<BrowserInstanceEvents> {
 
     this.#logger.log('Uploading user data.');
 
-    await this.module_ref.get(UserDataService).uploadUserData(
+    await this.module_ref.get(UserDataService).save(
       this.#connection_options.user_data_id,
       this.#user_data_folder
     );

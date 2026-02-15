@@ -1,21 +1,76 @@
 import { GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { Injectable, Logger } from "@nestjs/common";
-import * as fs from 'fs';
-import * as fsPromise from 'fs/promises';
+import * as fs from 'fs-extra';
 import * as zlib from 'zlib';
 import * as tar from 'tar';
-import LimitStream from "src/transforms/limit-stream";
+
+export abstract class UserDataService {
+
+    /**
+     * Load the user data from persistent storage. If no user data associated to the ID, doesn't do anything.
+     * 
+     * @param id The ID of the user data to load.
+     * @param user_data_folder The folder to load the user data into.
+     */
+    abstract load(id: string, user_data_folder: string): Promise<void>;
+
+    /**
+     * Save the user data to a persistent storage.
+     * 
+     * @param id The ID used to stored the user data in persistent storage.
+     * @param user_data_folder The folder containing the user data to save.
+     */
+    abstract save(id: string, user_data_folder: string): Promise<void>;
+
+}
 
 @Injectable()
-export class UserDataService {
+export class LocalUserDataService extends UserDataService {
 
-    private readonly logger = new Logger(UserDataService.name);
+    private static readonly USER_DATA_FOLDER = '/blitzbrowser/user-data';
+
+    readonly #logger = new Logger(LocalUserDataService.name);
+
+    async load(id: string, user_data_folder: string): Promise<void> {
+        const folder = `${LocalUserDataService.USER_DATA_FOLDER}/${id}`;
+
+        if (!await fs.pathExists(folder)) {
+            return;
+        }
+
+        try {
+            await fs.move(folder, user_data_folder, { overwrite: true });
+        } catch (e) {
+            this.#logger.error(`Error while loading user data ${folder}`, e);
+        }
+    }
+
+    async save(id: string, user_data_folder: string): Promise<void> {
+        const folder = `${LocalUserDataService.USER_DATA_FOLDER}/${id}`;
+
+        await fs.rm(folder, { recursive: true, force: true });
+
+        try {
+            await fs.move(user_data_folder, folder);
+        } catch (e) {
+            this.#logger.error(`Error while save ${user_data_folder} to user data ${folder}`, e);
+        }
+    }
+
+}
+
+@Injectable()
+export class S3UserDataService extends UserDataService {
+
+    readonly #logger = new Logger(S3UserDataService.name);
 
     constructor(
         private readonly s3_client: S3Client,
-    ) { }
+    ) {
+        super();
+    }
 
-    async downloadUserData(id: string, user_data_folder: string) {
+    async load(id: string, user_data_folder: string) {
         try {
             const tar_file = `/tmp/${crypto.randomUUID()}`;
             const response = await this.s3_client.send(new GetObjectCommand({
@@ -23,11 +78,11 @@ export class UserDataService {
                 Key: id,
             }));
 
-            await fsPromise.writeFile(tar_file, await response.Body.transformToByteArray());
+            await fs.writeFile(tar_file, await response.Body.transformToByteArray());
             await this.untarUserDataFolder(tar_file, user_data_folder);
-            await fsPromise.rm(tar_file);
+            await fs.rm(tar_file);
 
-            this.logger.log(`Downloaded user data ${id} folder:${user_data_folder}`);
+            this.#logger.log(`Downloaded user data ${id} folder:${user_data_folder}`);
         } catch (e) {
             if (e.Code === 'NoSuchKey') {
                 return;
@@ -37,18 +92,18 @@ export class UserDataService {
         }
     }
 
-    async uploadUserData(id: string, user_data_folder: string) {
+    async save(id: string, user_data_folder: string) {
         const tar_file = await this.tarUserDataFolder(user_data_folder);
 
         await this.s3_client.send(new PutObjectCommand({
             Bucket: process.env.S3_USER_DATA_BUCKET,
             Key: id,
-            Body: await fsPromise.readFile(tar_file)
+            Body: await fs.readFile(tar_file)
         }));
 
-        await fsPromise.rm(tar_file);
+        await fs.rm(tar_file);
 
-        this.logger.log(`Uploaded user data ${id} folder:${user_data_folder}`);
+        this.#logger.log(`Uploaded user data ${id} folder:${user_data_folder}`);
     }
 
     /**
@@ -58,8 +113,6 @@ export class UserDataService {
      */
     protected async tarUserDataFolder(user_data_folder: string): Promise<string> {
         const tar_file = `${crypto.randomUUID()}.tar.gz`;
-
-        await this.#cleanUserDataFolder(user_data_folder);
 
         await tar.create({
             gzip: true,
@@ -74,7 +127,6 @@ export class UserDataService {
         await new Promise((res, rej) => {
             fs.createReadStream(tar_file)
                 .pipe(zlib.createGunzip())
-                .pipe(new LimitStream(104857600)) // Max 100 MB decompression
                 .pipe(tar.extract({ cwd: user_data_folder }))
                 .on('finish', () => {
                     res(undefined);
@@ -83,20 +135,6 @@ export class UserDataService {
                     rej(err);
                 });
         });
-        await this.#cleanUserDataFolder(user_data_folder);
-    }
-
-    /**
-     * Remove the undesired files(locks, logs, metrics) and folders from the user data
-     * @param user_data_folder 
-     */
-    async #cleanUserDataFolder(user_data_folder: string) {
-        await Promise.allSettled([
-            fsPromise.rm(`${user_data_folder}/Default/Sessions`, { recursive: true, force: true }),
-            fsPromise.rm(`${user_data_folder}/SingletonLock`, { force: true }),
-            fsPromise.rm(`${user_data_folder}/SingletonCookie`, { force: true }),
-            fsPromise.rm(`${user_data_folder}/SingletonSocket`, { force: true }),
-        ]);
     }
 
 }
