@@ -5,12 +5,14 @@ services:
       dockerfile: Dockerfile
     ports:
       - "9999:9999"
+    volumes:
+      - ./user-data:/blitzbrowser/user-data
     environment:
       API_KEY: asd
-      S3_ENDPOINT: http://s3:9000
-      S3_ACCESS_KEY_ID: rustfsadmin
-      S3_SECRET_ACCESS_KEY: rustfsadmin
-      S3_USER_DATA_BUCKET: user-data
+      # S3_ENDPOINT: http://s3:9000
+      # S3_ACCESS_KEY_ID: rustfsadmin
+      # S3_SECRET_ACCESS_KEY: rustfsadmin
+      # S3_USER_DATA_BUCKET: user-data
       MAX_BROWSER_INSTANCES: 12
     shm_size: "2gb"
     restart: always

@@ -1,7 +1,7 @@
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import * as fs from 'fs';
+import * as fs from 'fs-extra';
 import * as path from 'path';
 
 const package_json = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json')).toString('utf8'));

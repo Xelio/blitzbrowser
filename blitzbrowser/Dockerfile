@@ -6,9 +6,13 @@ RUN apt-get install -y xvfb x11vnc fluxbox tini fonts-recommended fonts-noto-col
 RUN fc-cache -f -v
 
 RUN mkdir -p /var/cache/fontconfig
-RUN mkdir -p /.cache/fontconfig
 RUN chmod -R 777 /var/cache/fontconfig
+
+RUN mkdir -p /.cache/fontconfig
 RUN chmod -R 777 /.cache/fontconfig
+
+RUN mkdir -p /blitzbrowser/user-data
+RUN chmod -R 777 /blitzbrowser/user-data
 
 USER $PPTRUSER_UID
 
