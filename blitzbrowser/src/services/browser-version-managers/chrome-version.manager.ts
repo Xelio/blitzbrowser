@@ -12,9 +12,6 @@ interface ChromeTestingVersions {
     }[];
 }
 
-/**
- * Known limitation: Versions before 116.0.5791.0 are not working.
- */
 export class ChromeVersionManager implements BrowserVersionManager {
 
     readonly #logger = new Logger(ChromeVersionManager.name);
@@ -57,7 +54,7 @@ export class ChromeVersionManager implements BrowserVersionManager {
             return this.#version_install_promises.get(version);
         }
 
-        this.#logger.log(`Installing version ${version}.`);
+        this.#logger.log(`Installing version ${version}`);
 
         const version_install_promise = new Promise<void>((res, rej) => {
             const process = spawn(`tini`, ['-s', `--`, `npx`, `@puppeteer/browsers`, `install`, `chrome@${version}`, `--path`, BROWSERS_FOLDER]);
@@ -90,7 +87,11 @@ export class ChromeVersionManager implements BrowserVersionManager {
     async loadVersions(): Promise<void> {
         const chrome_testing_versions: ChromeTestingVersions = await (await fetch('https://googlechromelabs.github.io/chrome-for-testing/known-good-versions.json')).json();
 
-        this.#chrome_versions = new Set(chrome_testing_versions.versions.map(v => v.version));
+        this.#chrome_versions = new Set(chrome_testing_versions.versions.filter(v => {
+            const args = v.version.split('.');
+
+            return parseInt(args[0]) >= 116; // Versions before 116 are not working
+        }).map(v => v.version));
         this.#latest_version = chrome_testing_versions.versions[chrome_testing_versions.versions.length - 1].version;
     }
 

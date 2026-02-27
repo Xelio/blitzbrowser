@@ -85,7 +85,7 @@ export class CDPWebSocketGateway implements OnModuleDestroy {
           throw `Invalid browser version.`;
         }
       } catch (e) {
-        this.#logger.error('Error while checking browser version.', e)
+        this.#logger.error(`Error while checking browser version: ${e}`);
         cdp_websocket_client.close(CDPWebSocketGateway.BAD_REQUEST_CODE, typeof e === 'string' ? e : 'Error with browser version manager.');
         return;
       }
