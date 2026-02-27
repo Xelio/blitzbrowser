@@ -58,23 +58,6 @@ export class CDPWebSocketGateway implements OnModuleDestroy {
         return;
       }
 
-      const { browser_family, browser_version } = parsed_connection_options.data;
-
-      try {
-        if (await this.browser_version_service.isValidVersion(browser_family, browser_version)) {
-          if (!await this.browser_version_service.isVersionInstalled(browser_family, browser_version)) {
-            await this.browser_version_service.installVersion(browser_family, browser_version);
-            -- // Right after installed, the browser doesn't work
-          }
-        } else {
-          throw `Invalid browser version.`;
-        }
-      } catch (e) {
-        this.#logger.error('Error while checking browser version.', e)
-        cdp_websocket_client.close(CDPWebSocketGateway.BAD_REQUEST_CODE, typeof e === 'string' ? e : 'Error with browser version manager.');
-        return;
-      }
-
       tunnel = new Tunnel();
 
       tunnel.on('message', message => {
@@ -90,6 +73,22 @@ export class CDPWebSocketGateway implements OnModuleDestroy {
       cdp_websocket_client.on('message', message => {
         tunnel.receiveMessage(Message.of(BrowserInstance.CDP_CHANNEL_ID, message.toString('utf8')));
       });
+
+      const { browser_family, browser_version } = parsed_connection_options.data;
+
+      try {
+        if (await this.browser_version_service.isValidVersion(browser_family, browser_version)) {
+          if (!await this.browser_version_service.isVersionInstalled(browser_family, browser_version)) {
+            await this.browser_version_service.installVersion(browser_family, browser_version);
+          }
+        } else {
+          throw `Invalid browser version.`;
+        }
+      } catch (e) {
+        this.#logger.error('Error while checking browser version.', e)
+        cdp_websocket_client.close(CDPWebSocketGateway.BAD_REQUEST_CODE, typeof e === 'string' ? e : 'Error with browser version manager.');
+        return;
+      }
 
       const browser_instance: BrowserInstance = await this.#getBrowserInstance();
 

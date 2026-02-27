@@ -12,6 +12,9 @@ interface ChromeTestingVersions {
     }[];
 }
 
+/**
+ * Known limitation: Versions before 116.0.5791.0 are not working.
+ */
 export class ChromeVersionManager implements BrowserVersionManager {
 
     readonly #logger = new Logger(ChromeVersionManager.name);
