@@ -64,6 +64,7 @@ export class CDPWebSocketGateway implements OnModuleDestroy {
         if (await this.browser_version_service.isValidVersion(browser_family, browser_version)) {
           if (!await this.browser_version_service.isVersionInstalled(browser_family, browser_version)) {
             await this.browser_version_service.installVersion(browser_family, browser_version);
+            -- // Right after installed, the browser doesn't work
           }
         } else {
           throw `Invalid browser version.`;
