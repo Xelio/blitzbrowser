@@ -174,6 +174,8 @@ class BrowserInstanceProcess {
             dumpio: true,
             handleSIGTERM: false,
             args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
                 `--remote-debugging-port=${this.#cdp_port}`,
                 '--remote-debugging-address=0.0.0.0',
                 '--no-first-run',
