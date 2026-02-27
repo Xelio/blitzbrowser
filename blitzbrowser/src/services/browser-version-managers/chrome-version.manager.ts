@@ -1,6 +1,8 @@
 import { spawn } from "child_process";
-import { BROWSERS_FOLDER, BrowserVersionManager } from ".";
+import { BROWSERS_FOLDER, BrowserVersionManager, Version } from ".";
 import * as fs from 'fs-extra';
+import { Logger } from "@nestjs/common";
+import puppeteer from "puppeteer";
 
 interface ChromeTestingVersions {
     timestamp: string;
@@ -12,33 +14,56 @@ interface ChromeTestingVersions {
 
 export class ChromeVersionManager implements BrowserVersionManager {
 
+    readonly #logger = new Logger(ChromeVersionManager.name);
+
     #chrome_versions: Set<string> = new Set();
+
+    #latest_version: string = '';
 
     readonly #version_install_promises: Map<string, Promise<void>> = new Map();
 
     readonly family = 'chrome';
 
-    async isVersionInstalled(version: string): Promise<boolean> {
-        return fs.exists(`${BROWSERS_FOLDER}/chrome/linux-${version}/chrome-linux64/chrome`);
+    getExecutablePath(version: Version): string {
+        if (version === 'default') {
+            return puppeteer.executablePath();
+        }
+
+        if (version === 'latest') {
+            return this.getExecutablePath(this.#latest_version);
+        }
+
+        return `${BROWSERS_FOLDER}/chrome/linux-${version}/chrome-linux64/chrome`;
     }
 
-    installVersion(version: string): Promise<void> {
+    async isVersionInstalled(version: Version): Promise<boolean> {
+        return fs.exists(this.getExecutablePath(version));
+    }
+
+    installVersion(version: Version): Promise<void> {
+        if (version === 'default') {
+            return;
+        }
+
+        if (version === 'latest') {
+            return this.installVersion(this.#latest_version);
+        }
+
         if (this.#version_install_promises.has(version)) {
-            console.log('installation in progress');
+            this.#logger.log(`Version ${version} is already installing.`);
             return this.#version_install_promises.get(version);
         }
 
-        console.log('installing');
+        this.#logger.log(`Installing version ${version}.`);
 
         const version_install_promise = new Promise<void>((res, rej) => {
-            const process = spawn(`tini`, ['-s', `--`, `npx`, `@puppeteer/browsers`, `install`, `chrome@${version}`, `--path`, BROWSERS_FOLDER], {
-                stdio: 'pipe'
-            });
+            const process = spawn(`tini`, ['-s', `--`, `npx`, `@puppeteer/browsers`, `install`, `chrome@${version}`, `--path`, BROWSERS_FOLDER]);
 
             process.on('exit', code => {
                 this.#version_install_promises.delete(version);
-                
+
                 if (code === 0) {
+                    this.#logger.log(`Installed version ${version}.`);
                     res(undefined);
                 } else {
                     rej(`Error while downloading version ${version}`);
@@ -51,7 +76,11 @@ export class ChromeVersionManager implements BrowserVersionManager {
         return version_install_promise;
     }
 
-    async isValidVersion(version: string): Promise<boolean> {
+    async isValidVersion(version: Version): Promise<boolean> {
+        if (version === 'latest' || version === 'default') {
+            return true;
+        }
+
         return this.#chrome_versions.has(version);
     }
 
@@ -59,6 +88,7 @@ export class ChromeVersionManager implements BrowserVersionManager {
         const chrome_testing_versions: ChromeTestingVersions = await (await fetch('https://googlechromelabs.github.io/chrome-for-testing/known-good-versions.json')).json();
 
         this.#chrome_versions = new Set(chrome_testing_versions.versions.map(v => v.version));
+        this.#latest_version = chrome_testing_versions.versions[chrome_testing_versions.versions.length - 1].version;
     }
 
 }

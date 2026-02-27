@@ -1,14 +1,18 @@
 export const BROWSERS_FOLDER = '/blitzbrowser/browsers';
 
+export type Version = 'latest' | 'default' | (string & {});
+
 export interface BrowserVersionManager {
 
     get family(): string;
 
-    isVersionInstalled(version: string): Promise<boolean>;
+    getExecutablePath(version: Version): string;
 
-    isValidVersion(version: string): Promise<boolean>;
+    isVersionInstalled(version: Version): Promise<boolean>;
 
-    installVersion(version: string): Promise<void>;
+    isValidVersion(version: Version): Promise<boolean>;
+
+    installVersion(version: Version): Promise<void>;
 
     loadVersions(): Promise<void>;
 
