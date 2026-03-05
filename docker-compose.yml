@@ -24,7 +24,6 @@ services:
       - "3000:3000"
     environment:
       AUTH_KEY: 123
-      BLITZBROWSER_API_URL: http://blitzbrowser:9999
       BLITZBROWSER_API_KEY: asd
     restart: always
   s3:

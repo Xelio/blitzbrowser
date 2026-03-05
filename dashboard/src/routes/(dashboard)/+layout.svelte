@@ -4,12 +4,10 @@
   import AppSidebar from "$lib/components/app-sidebar.svelte";
   import { Separator } from "$lib/components/ui/separator/index.js";
   import * as Sidebar from "$lib/components/ui/sidebar/index.js";
-  import * as Alert from "$lib/components/ui/alert/index.js";
   import favicon from "$lib/assets/favicon.ico";
   import { onMount } from "svelte";
   import { browser_store } from "$lib/browsers.svelte";
   import Breadcrumbs from "$lib/components/breadcrumbs.svelte";
-  import CircleAlert from "@lucide/svelte/icons/circle-alert";
 
   let { children } = $props();
 
@@ -40,15 +38,6 @@
       </div>
     </header>
     <div class="flex flex-col gap-4 p-4">
-      {#if browser_store.connection_error}
-        <Alert.Root variant="destructive">
-          <CircleAlert />
-          <Alert.Title>{browser_store.connection_error}</Alert.Title>
-          <Alert.Description>
-            Check that BlitzBrowser is running and the dashboard is configured correctly.
-          </Alert.Description>
-        </Alert.Root>
-      {/if}
       {@render children()}
     </div>
   </Sidebar.Inset>
