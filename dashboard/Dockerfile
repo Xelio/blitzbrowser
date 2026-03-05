@@ -17,8 +17,12 @@ FROM base AS build
 RUN pnpm install --frozen-lockfile
 
 COPY ./src ./src
+COPY ./server.ts ./server.ts
+COPY ./ws-proxy.ts ./ws-proxy.ts
+COPY ./auth-check.ts ./auth-check.ts
+COPY ./tsconfig.server.json ./tsconfig.server.json
 
-RUN pnpm build
+RUN pnpm build && pnpm tsc -p tsconfig.server.json
 
 FROM base AS prod-deps
 
@@ -28,7 +32,9 @@ FROM node:25-alpine
 
 WORKDIR /app
 
+COPY --from=build /app/package.json ./package.json
 COPY --from=prod-deps /app/node_modules ./node_modules
-COPY --from=build /app/build ./build 
+COPY --from=build /app/build ./build
+COPY --from=build /app/dist ./dist
 
-CMD ["node", "build/index.js"]
+CMD ["node", "dist/server.js"]
