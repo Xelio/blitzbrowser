@@ -74,10 +74,7 @@ export class BrowserStore {
     async #updateBrowserPool() {
         for (let attempt = 0; attempt < BrowserStore.MAX_RETRIES; attempt++) {
             try {
-                const response = await fetch('/api/browser-pool');
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-                this.browser_pool = await response.json();
+                this.browser_pool = await getBrowserPool();
                 this.connection_error = undefined;
                 return true;
             } catch {
