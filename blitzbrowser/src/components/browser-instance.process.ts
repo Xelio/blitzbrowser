@@ -178,6 +178,7 @@ class BrowserInstanceProcess {
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
+                '--disable-blink-features=AutomationControlled',
                 `--remote-debugging-port=${this.#cdp_port}`,
                 '--remote-debugging-address=0.0.0.0',
                 '--no-first-run',
