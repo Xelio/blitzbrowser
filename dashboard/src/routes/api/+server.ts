@@ -7,7 +7,12 @@ export function GET({ cookies }) {
         error(403, 'You are not authenticated');
     }
 
+    if (env.PROXY_BLITZBROWSER_API === 'true') {
+        return json({ proxy: true });
+    }
+
     return json({
+        proxy: false,
         url: env.BLITZBROWSER_API_URL || 'http://localhost:9999',
         api_key: env.BLITZBROWSER_API_KEY
     });
